@@ -2,28 +2,47 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func executeTemplate(w http.ResponseWriter, filePath string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>Welcome to my awesome website</h1>")
+	tpl, err := template.ParseFiles(filePath)
+	if err != nil {
+		log.Printf("Parsing the template: %v\n", err)
+		http.Error(w, "Failed to parse the template.", http.StatusInternalServerError)
+		return
+	}
+	err = tpl.Execute(w, "test ")
+	if err != nil {
+		log.Printf("Executing the template: %v\n", err)
+		http.Error(w, "Failed to execute the template.", http.StatusInternalServerError)
+		return
+	}
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	executeTemplate(w, "templates/home.gohtml")
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>Contact Us</h1><p>reach out at <a href=\"mailto:dagimawimantefardo@gmail.com\">email me</a>")
+	executeTemplate(w, "templates/contact.gohtml")
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>FAQs</h1><div><p>Is this free?</p><p>Yes this is free forever.</p></div>")
+	executeTemplate(w, "templates/faq.gohtml")
 }
 
 func main() {
 	router := chi.NewRouter()
+
+	router.Use(middleware.Logger)
+
 	router.Get("/", homeHandler)
 	router.Get("/contact", contactHandler)
 	router.Get("/faq", faqHandler)
