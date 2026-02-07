@@ -1,1 +1,11 @@
-<h1>FAQs</h1><div><p>Is this free?</p><p>Yes this is free forever.</p></div>
+<h1>FAQs</h1>
+{{ range .}}
+    {{ template "question-answer" . }}
+{{ end }}
+
+{{ define "question-answer" }}
+<div>
+    <p>{{ .Question }}</p>
+    <p>{{ .Answer }}</p>
+</div>
+{{ end }}
