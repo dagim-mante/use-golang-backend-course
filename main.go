@@ -2,28 +2,23 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
+	"github.com/dagim-mante/golang-backend-course/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func executeTemplate(w http.ResponseWriter, filePath string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tpl, err := template.ParseFiles(filePath)
+	tpl, err := views.Parse(filePath)
 	if err != nil {
 		log.Printf("Parsing the template: %v\n", err)
 		http.Error(w, "Failed to parse the template.", http.StatusInternalServerError)
 		return
 	}
-	err = tpl.Execute(w, "test ")
-	if err != nil {
-		log.Printf("Executing the template: %v\n", err)
-		http.Error(w, "Failed to execute the template.", http.StatusInternalServerError)
-		return
-	}
+	tpl.Execute(w, nil)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
