@@ -2,45 +2,24 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
+	"github.com/dagim-mante/golang-backend-course/controllers"
 	"github.com/dagim-mante/golang-backend-course/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func executeTemplate(w http.ResponseWriter, filePath string) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tpl, err := views.Parse(filePath)
-	if err != nil {
-		log.Printf("Parsing the template: %v\n", err)
-		http.Error(w, "Failed to parse the template.", http.StatusInternalServerError)
-		return
-	}
-	tpl.Execute(w, nil)
-}
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, "templates/home.gohtml")
-}
-
-func contactHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, "templates/contact.gohtml")
-}
-
-func faqHandler(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, "templates/faq.gohtml")
-}
-
 func main() {
 	router := chi.NewRouter()
-
 	router.Use(middleware.Logger)
 
-	router.Get("/", homeHandler)
-	router.Get("/contact", contactHandler)
-	router.Get("/faq", faqHandler)
+	router.Get("/", controllers.StaticHandler(views.Must(views.Parse("templates/home.gohtml"))))
+
+	router.Get("/contact", controllers.StaticHandler(views.Must(views.Parse("templates/contact.gohtml"))))
+
+	router.Get("/faq", controllers.StaticHandler(views.Must(views.Parse("templates/faq.gohtml"))))
+
 	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page not found", http.StatusNotFound)
 	})
